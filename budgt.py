@@ -6,7 +6,7 @@ import calendar
 import math
 import datetime
 
-# data file - The Palm - 250 W 50 St - 8th Ave on South side
+# data file
 db_file = 'budget.db'
 
 # show accounts from list of rows
@@ -43,6 +43,11 @@ def print_date(freq, day):
 def ordinal(n):
     return "{:d}{:s}".format(n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
 
+# get account data
+def get_db_data(cursor, table="accounts"):
+    cursor.execute("SELECT * FROM " + table)
+    return cursor.fetchall()
+
 if __name__ == '__main__':
     # find out what the user wants
     parser = argparse.ArgumentParser(
@@ -50,9 +55,9 @@ if __name__ == '__main__':
         epilog="edits are manual unless a file is passed as an argument")
     parser.add_argument("-c", "--clear", action="store_true", help="clear all entries before processing")
     edit_g = parser.add_mutually_exclusive_group()
-    edit_g.add_argument("-e", "--edit", action="store_true", help="edit, add, or remove entries")
+    # edit_g.add_argument("-e", "--edit", action="store_true", help="edit, add, or remove entries")
     edit_g.add_argument("-u", "--update", action="store_true", help="update account balances")
-    parser.add_argument("-f", "--file", help="input data from file")
+    # parser.add_argument("-f", "--file", help="input data from file")
     args = parser.parse_args()
     # see what's going on in the file
     with sqlite3.connect(db_file) as conn:
@@ -61,22 +66,53 @@ if __name__ == '__main__':
         c = conn.cursor()
         # clear data if prompted
         if args.clear:
-            c.execute("DROP TABLE IF EXISTS accounts;")
-            c.execute("DROP TABLE IF EXISTS transactions;")
+            c.execute("DROP TABLE IF EXISTS accounts")
+            c.execute("DROP TABLE IF EXISTS transactions")
         # make tables if they don't already exist
-        c.execute('CREATE TABLE IF NOT EXISTS accounts (name text PRIMARY KEY, balance numeric, holds numeric, positive integer);')
-        c.execute('CREATE TABLE IF NOT EXISTS transactions (name text PRIMARY KEY, amount numeric NOT NULL, frequency text NOT NULL, day integer, account text NOT NULL, FOREIGN KEY (account) REFERENCES accounts(name));')
+        c.execute('CREATE TABLE IF NOT EXISTS accounts (name text PRIMARY KEY, balance numeric, holds numeric, positive integer)')
+        c.execute('CREATE TABLE IF NOT EXISTS transactions (name text PRIMARY KEY, amount numeric NOT NULL, frequency text NOT NULL, day integer, account text NOT NULL, FOREIGN KEY (account) REFERENCES accounts(name))')
+        # editing
         if args.edit:
             pass
         elif args.update:
-            pass
+            # show accounts
+            accts = get_db_data(c, "accounts")
+            show_accts(accts)
+            # update accounts until break
+            while True:
+                acct = input("Enter account to update (leave blank to exit): ")
+                if not acct: break
+                if acct in [a['name'] for a in accts]:
+                    # start sql command
+                    cmd_str = "UPDATE accounts SET "
+                    # get input(s)
+                    bal = input("Enter balance: ")
+                    hol = input("Enter holds:   ")
+                    # minimal units
+                    bal_str = "balance={:.02f}".format(float(bal)) if bal else ""
+                    hol_str = "holds={:.02f}".format(float(hol)) if hol else ""
+                    # change balance?
+                    if bal:
+                        cmd_str += bal_str
+                        if hol:
+                            cmd_str += ", " + hol_str
+                    elif hol:
+                        cmd_str += hol_str
+                    else:
+                        print("No values entered.")
+                        continue
+                    # add account name
+                    cmd_str += " WHERE name='{0}'".format(acct)
+                    print(cmd_str)
+                    # actually execute it
+                    c.execute(cmd_str)
+                else:
+                    print("Account '{0}' not in database.".format(acct))
+                print("")
         else:
             # show accounts
-            c.execute("SELECT * FROM accounts;")
-            accts = c.fetchall()
-            show_accts(accts)
-            c.execute("SELECT * FROM transactions;")
-            trsct = c.fetchall()
-            show_trsct(trsct)
+            show_accts(get_db_data(c, "accounts"))
+            # show transactions
+            show_trsct(get_db_data(c, "transactions"))
         # commit all changes to the database
         conn.commit()
