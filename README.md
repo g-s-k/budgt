@@ -13,6 +13,7 @@ Budget forecasting with Python
   * Provide color and order configuration that is stored in the database
   * Get current balances from the web (via OFX)
   * Support payment due dates
+  * Support negative date indices
 
 ## How it works
   1. Account balances and recurrent transactions (paydays, expenses, etc.) are stored in a sqlite3 database
