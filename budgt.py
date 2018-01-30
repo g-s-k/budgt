@@ -43,10 +43,50 @@ def print_date(freq, day):
 def ordinal(n):
     return "{:d}{:s}".format(n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
 
-# get account data
+# get account data from db
 def get_db_data(cursor, table="accounts"):
     cursor.execute("SELECT * FROM " + table)
     return cursor.fetchall()
+
+# find partial option matches
+def is_letter_opt(strn, letr, cs_sen=False):
+    if not cs_sen:
+        strn = strn.lower()
+        letr = letr.lower()
+    return strn in (letr, "'" + letr + "'", '"' + letr + '"', "(" + letr + ")",
+                    "[" + letr + "]")
+
+# show edit options
+def print_edit_opts():
+    print("\nEditing options:\n")
+    print("    H        help")
+    print("    A        accounts")
+    print("    T        transactions")
+    print("    (blank)  exit")
+    print("")
+
+# show editing operations
+def print_edit_oper():
+    print("\nEntry operations:\n")
+    print("    A        add")
+    print("    M        modify existing")
+    print("    R        remove")
+    print("    (blank)  exit")
+    print("")
+
+# get kb input for account
+def get_acct_input(name=None, balance=None, holds=None, positive=None):
+    if name is None:
+        name = input("Enter account name (must be unique): ")
+    if balance is None:
+        balance = input("Enter account balance: ")
+        balance = float(balance) if balance else 0.
+    if holds is None:
+        holds = input("Enter account holds: ")
+        holds = float(holds) if holds else 0.
+    if positive is None:
+        positive = input("Enter 1 if this account holds positive value, or 0 for negative value: ")
+    return dict(name=name, balance=balance, holds=holds, positive=positive)
 
 if __name__ == '__main__':
     # find out what the user wants
@@ -55,7 +95,7 @@ if __name__ == '__main__':
         epilog="edits are manual unless a file is passed as an argument")
     parser.add_argument("-c", "--clear", action="store_true", help="clear all entries before processing")
     edit_g = parser.add_mutually_exclusive_group()
-    # edit_g.add_argument("-e", "--edit", action="store_true", help="edit, add, or remove entries")
+    edit_g.add_argument("-e", "--edit", action="store_true", help="edit, add, or remove entries")
     edit_g.add_argument("-u", "--update", action="store_true", help="update account balances")
     # parser.add_argument("-f", "--file", help="input data from file")
     args = parser.parse_args()
@@ -73,7 +113,43 @@ if __name__ == '__main__':
         c.execute('CREATE TABLE IF NOT EXISTS transactions (name text PRIMARY KEY, amount numeric NOT NULL, frequency text NOT NULL, day integer, account text NOT NULL, FOREIGN KEY (account) REFERENCES accounts(name))')
         # editing
         if args.edit:
-            pass
+            print_edit_opts()
+            while True:
+                edit_tbl = input("Choose category to edit: ")
+                if not edit_tbl: break
+                # go to the table that was picked
+                if is_letter_opt(edit_tbl, "a"):
+                    # show accounts
+                    accts = get_db_data(c, "accounts")
+                    show_accts(accts)
+                    # decide what to do
+                    a_r_m = input("Choose operation to perform: ")
+                    if not a_r_m:
+                        continue
+                    elif is_letter_opt(a_r_m, "a"):
+                        acct_info = get_acct_input()
+                        c.execute("INSERT INTO accounts VALUES"
+                            "({0}, {1}, {2}, {3})".format(acct_info["name"],
+                            acct_info["balance"], acct_info["holds"],
+                            acct_info["positive"]))
+                    elif is_letter_opt(a_r_m, "r"):
+                        pass
+                    elif is_letter_opt(a_r_m, "m"):
+                        pass
+                    else:
+                        print_edit_oper()
+                elif is_letter_opt(edit_tbl, "t"):
+                    # show transactions
+                    trscts = get_db_data(c, "transactions")
+                    show_trsct(trscts)
+                    # decide what to do
+                    a_r_m = input("Choose operation to perform: ")
+                    if not a_r_m: continue
+                elif is_letter_opt(edit_tbl, "h"):
+                    print_edit_opts()
+                else:
+                    print("Unrecognized option. Enter 'H' for help.")
+                    continue
         elif args.update:
             # show accounts
             accts = get_db_data(c, "accounts")
@@ -109,10 +185,9 @@ if __name__ == '__main__':
                 else:
                     print("Account '{0}' not in database.".format(acct))
                 print("")
-        else:
-            # show accounts
-            show_accts(get_db_data(c, "accounts"))
-            # show transactions
-            show_trsct(get_db_data(c, "transactions"))
+        # show accounts
+        show_accts(get_db_data(c, "accounts"))
+        # show transactions
+        show_trsct(get_db_data(c, "transactions"))
         # commit all changes to the database
         conn.commit()

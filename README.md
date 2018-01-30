@@ -14,6 +14,7 @@ Budget forecasting with Python
   * Get current balances from the web (via OFX)
   * Support payment due dates
   * Support negative date indices
+  * Support batch import/export from json
 
 ## How it works
   1. Account balances and recurrent transactions (paydays, expenses, etc.) are stored in a sqlite3 database
