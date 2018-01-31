@@ -60,14 +60,16 @@ for i, day in enumerate(days):
             series = effect_accounts(i, el, series)
         elif el['frequency'] == 'monthly' and day.day == el['day']:
             series = effect_accounts(i, el, series)
-        elif el['frequency'] == 'annual' and int(day.strftime('%j')) == el['day']:
+        elif el['frequency'] == 'annual' and \
+            int(day.strftime('%j')) == el['day']:
             series = effect_accounts(i, el, series)
 
 
 # function to report payments
 def print_transfer(dat, disc, secu, sink='credit card', source='secu_checking'):
-    print('transfer ${0:.02f} from {4:s} to {3:s} on {1}. remaining bank balance is ${2:.02f}'.format(
-        -disc, dat.strftime('%m-%d'), secu, sink, source))
+    print('transfer ${0:.02f} from {4:s} to {3:s} on {1}.'
+          'remaining bank balance is ${2:.02f}'.format(-disc,
+          dat.strftime('%m-%d'), secu, sink, source))
 
 for j, day in enumerate(days):
     current_balance_c = series['citi'][j]

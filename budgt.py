@@ -16,7 +16,8 @@ def show_accts(accts):
     for row in sorted(accts, key=lambda x: x['name']):
         name_pad = row['name'] + ' ' * (8 - len(row['name']))
         factor = 1 if row['positive'] else -1
-        print("{0}\t{1:8.02f}\t{2:8.02f}".format(name_pad, row['balance'] * factor, -row['holds']))
+        print("{0}\t{1:8.02f}\t{2:8.02f}".format(name_pad,
+            row['balance'] * factor, -row['holds']))
     print("")
 
 # show transactions from list of rows
@@ -24,7 +25,9 @@ def show_trsct(trsct):
     print("\nTransaction\t  Amount   Source      Frequency")
     print("-----------\t  ------   ------      ---------")
     for row in sorted(trsct, key=lambda x: x['name']):
-        print("{0:8s}\t{1:8.02f}   {2:10s}  {3}".format(row['name'], row['amount'], row['account'], print_date(row['frequency'], row['day'])))
+        print("{0:8s}\t{1:8.02f}   {2:10s}  {3}".format(row['name'],
+            row['amount'], row['account'],
+            print_date(row['frequency'], row['day'])))
     print("")
 
 # pretty-print dates
@@ -41,7 +44,8 @@ def print_date(freq, day):
 
 # get ordinal numbers from cardinal ones
 def ordinal(n):
-    return "{:d}{:s}".format(n,"tsnrhtdd"[(math.floor(n/10)%10!=1)*(n%10<4)*n%10::4])
+    suffix = "tsnrhtdd"[((n // 10) % 10 != 1) * (n % 10 < 4) * n % 10::4]
+    return "{:d}{:s}".format(n, suffix)
 
 # get account data from db
 def get_db_data(cursor, table="accounts"):
@@ -85,7 +89,8 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None):
         holds = input("Enter account holds: ")
         holds = float(holds) if holds else 0.
     if positive is None:
-        positive = input("Enter 1 if this account holds positive value, or 0 for negative value: ")
+        positive = input("Enter 1 if this account holds positive value, or 0 "
+                         "for negative value: ")
     return dict(name=name, balance=balance, holds=holds, positive=positive)
 
 if __name__ == '__main__':
@@ -93,10 +98,13 @@ if __name__ == '__main__':
     parser = argparse.ArgumentParser(
         description="create or modify a budget database",
         epilog="edits are manual unless a file is passed as an argument")
-    parser.add_argument("-c", "--clear", action="store_true", help="clear all entries before processing")
+    parser.add_argument("-c", "--clear", action="store_true",
+                        help="clear all entries before processing")
     edit_g = parser.add_mutually_exclusive_group()
-    edit_g.add_argument("-e", "--edit", action="store_true", help="edit, add, or remove entries")
-    edit_g.add_argument("-u", "--update", action="store_true", help="update account balances")
+    edit_g.add_argument("-e", "--edit", action="store_true",
+                        help="edit, add, or remove entries")
+    edit_g.add_argument("-u", "--update", action="store_true",
+                        help="update account balances")
     # parser.add_argument("-f", "--file", help="input data from file")
     args = parser.parse_args()
     # see what's going on in the file
@@ -109,8 +117,13 @@ if __name__ == '__main__':
             c.execute("DROP TABLE IF EXISTS accounts")
             c.execute("DROP TABLE IF EXISTS transactions")
         # make tables if they don't already exist
-        c.execute('CREATE TABLE IF NOT EXISTS accounts (name text PRIMARY KEY, balance numeric, holds numeric, positive integer)')
-        c.execute('CREATE TABLE IF NOT EXISTS transactions (name text PRIMARY KEY, amount numeric NOT NULL, frequency text NOT NULL, day integer, account text NOT NULL, FOREIGN KEY (account) REFERENCES accounts(name))')
+        c.execute('CREATE TABLE IF NOT EXISTS accounts (name text PRIMARY KEY, '
+                  'balance numeric, holds numeric, positive integer)')
+        c.execute('CREATE TABLE IF NOT EXISTS transactions '
+                  '(name text PRIMARY KEY, amount numeric NOT NULL, '
+                  'frequency text NOT NULL, day integer, '
+                  'account text NOT NULL, '
+                  'FOREIGN KEY (account) REFERENCES accounts(name))')
         # editing
         if args.edit:
             print_edit_opts()
