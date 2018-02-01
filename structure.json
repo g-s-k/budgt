@@ -1,0 +1,16 @@
+{
+  "accounts": [
+    {"name": null},
+    {"balance": null},
+    {"holds": null},
+    {"positive": null}
+  ],
+  "transactions": [
+    {"name": null},
+    {"amount": null},
+    {"source": null},
+    {"dest": null},
+    {"frequency": null},
+    {"day": null}
+  ]
+}

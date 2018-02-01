@@ -5,9 +5,13 @@ import argparse
 import calendar
 import math
 import datetime
+import json
 
 # data file
 db_file = 'budget.db'
+
+# definition of data structures
+formats = json.load("structure.json")
 
 # show accounts from list of rows
 def show_accts(accts):
@@ -33,7 +37,7 @@ def show_trsct(trsct):
 # pretty-print dates
 def print_date(freq, day):
     if freq.lower() == "daily":
-        return "Every day"
+        return "Daily"
     elif freq.lower() == "weekly":
         return "Every " + calendar.day_name[day]
     elif freq.lower() == "monthly":
@@ -93,6 +97,10 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None):
                          "for negative value: ")
     return dict(name=name, balance=balance, holds=holds, positive=positive)
 
+def add_to_db(c, data, tbl):
+    c.execute("INSERT INTO {0} VALUES {1}".format(tbl, data))
+    return
+
 if __name__ == '__main__':
     # find out what the user wants
     parser = argparse.ArgumentParser(
@@ -141,10 +149,9 @@ if __name__ == '__main__':
                         continue
                     elif is_letter_opt(a_r_m, "a"):
                         acct_info = get_acct_input()
-                        c.execute("INSERT INTO accounts VALUES"
-                            "({0}, {1}, {2}, {3})".format(acct_info["name"],
-                            acct_info["balance"], acct_info["holds"],
-                            acct_info["positive"]))
+                        add_to_db(c, "accounts", "('{0}', {1}, {2}, {3})".format(acct_info["name"],
+                                                    acct_info["balance"], acct_info["holds"],
+                                                    acct_info["positive"])))
                     elif is_letter_opt(a_r_m, "r"):
                         pass
                     elif is_letter_opt(a_r_m, "m"):
