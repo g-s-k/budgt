@@ -1,16 +1,17 @@
 {
   "accounts": [
-    {"name": null},
-    {"balance": null},
-    {"holds": null},
-    {"positive": null}
+    ["name", "text", "PRIMARY KEY"],
+    ["balance", "numeric", "NOT NULL"],
+    ["holds", "numeric", "NOT NULL"],
+    ["positive", "integer", "NOT NULL"],
+    ["color", "text"]
   ],
   "transactions": [
-    {"name": null},
-    {"amount": null},
-    {"source": null},
-    {"dest": null},
-    {"frequency": null},
-    {"day": null}
+    ["name", "text", "PRIMARY KEY"],
+    ["amount", "numeric", "NOT NULL"],
+    ["source", "text"],
+    ["dest", "text"],
+    ["frequency", "text", "NOT NULL"],
+    ["day", "integer"]
   ]
 }

@@ -11,7 +11,8 @@ import json
 db_file = 'budget.db'
 
 # definition of data structures
-formats = json.load("structure.json")
+with open("structure.json", "r") as f:
+    formats = json.load(f)
 
 # show accounts from list of rows
 def show_accts(accts):
@@ -95,10 +96,15 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None):
     if positive is None:
         positive = input("Enter 1 if this account holds positive value, or 0 "
                          "for negative value: ")
-    return dict(name=name, balance=balance, holds=holds, positive=positive)
+        positive = int(positive) if positive else 1
+    return dict(name=name, balance=balance, holds=holds, positive=positive, color=None)
 
-def add_to_db(c, data, tbl):
-    c.execute("INSERT INTO {0} VALUES {1}".format(tbl, data))
+def add_to_table(c, tbl, data):
+    data_str = []
+    for col in formats[tbl]:
+        el_str = "'{0}'" if col[1] == "text" else "{0}"
+        data_str.append(el_str.format(data[col[0]]))
+    c.execute("INSERT INTO {0} VALUES ({1})".format(tbl, ", ".join(data_str)))
     return
 
 if __name__ == '__main__':
@@ -125,13 +131,9 @@ if __name__ == '__main__':
             c.execute("DROP TABLE IF EXISTS accounts")
             c.execute("DROP TABLE IF EXISTS transactions")
         # make tables if they don't already exist
-        c.execute('CREATE TABLE IF NOT EXISTS accounts (name text PRIMARY KEY, '
-                  'balance numeric, holds numeric, positive integer)')
-        c.execute('CREATE TABLE IF NOT EXISTS transactions '
-                  '(name text PRIMARY KEY, amount numeric NOT NULL, '
-                  'frequency text NOT NULL, day integer, '
-                  'account text NOT NULL, '
-                  'FOREIGN KEY (account) REFERENCES accounts(name))')
+        for k, v in formats.items():
+            fmt_str = ", ".join([" ".join(a) for a in v])
+            c.execute('CREATE TABLE IF NOT EXISTS {0} ({1})'.format(k, fmt_str))
         # editing
         if args.edit:
             print_edit_opts()
@@ -149,9 +151,7 @@ if __name__ == '__main__':
                         continue
                     elif is_letter_opt(a_r_m, "a"):
                         acct_info = get_acct_input()
-                        add_to_db(c, "accounts", "('{0}', {1}, {2}, {3})".format(acct_info["name"],
-                                                    acct_info["balance"], acct_info["holds"],
-                                                    acct_info["positive"])))
+                        add_to_table(c, "accounts", acct_info)
                     elif is_letter_opt(a_r_m, "r"):
                         pass
                     elif is_letter_opt(a_r_m, "m"):
