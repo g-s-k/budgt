@@ -8,11 +8,8 @@ import datetime
 import json
 
 # data file
-db_file = 'budget.db'
-
-# definition of data structures
-with open("structure.json", "r") as f:
-    formats = json.load(f)
+db_file = "budget.db"
+struct_file = "structure.json"
 
 # show accounts from list of rows
 def show_accts(accts):
@@ -121,6 +118,9 @@ if __name__ == '__main__':
                         help="update account balances")
     # parser.add_argument("-f", "--file", help="input data from file")
     args = parser.parse_args()
+    # get definition of data structures
+    with open(struct_file, "r") as f:
+        formats = json.load(f)
     # see what's going on in the file
     with sqlite3.connect(db_file) as conn:
         # prepare cursor
