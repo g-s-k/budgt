@@ -1,4 +1,4 @@
-# budget.py
+# budgt.py
 Budget forecasting with Python
 
 ## What it can do
