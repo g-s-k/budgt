@@ -124,27 +124,21 @@ if __name__ == '__main__':
                 if acct_info['name'] in [a['name'] for a in accts]:
                     # start sql command
                     cmd_str = "UPDATE accounts SET "
-                    # get input(s)
-                    # bal = input("Enter balance: ")
-                    # hol = input("Enter holds:   ")
-                    bal = acct_info['balance']
-                    hol = acct_info['holds']
                     # minimal units
-                    bal_str = "balance={:.02f}".format(float(bal)) if bal else ""
-                    hol_str = "holds={:.02f}".format(float(hol)) if hol else ""
+                    bal_str = "balance={:.02f}".format(float(acct_info['balance'])) if acct_info['balance'] else ""
+                    hol_str = "holds={:.02f}".format(float(acct_info['holds'])) if acct_info['holds'] else ""
                     # change balance?
-                    if bal:
+                    if acct_info['balance']:
                         cmd_str += bal_str
-                        if hol:
+                        if acct_info['holds']:
                             cmd_str += ", " + hol_str
-                    elif hol:
+                    elif acct_info['holds']:
                         cmd_str += hol_str
                     else:
                         print("No values entered.")
                         continue
                     # add account name
                     cmd_str += " WHERE name='{0}'".format(acct_info['name'])
-                    print(cmd_str)
                     # actually execute it
                     c.execute(cmd_str)
                 else:
