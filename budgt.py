@@ -1,34 +1,15 @@
 #!/usr/bin/env python3
 
 import sqlite3
-import calendar
 import math
-import datetime
 import json
 
 from edit_utils import *
-from program_utils import parser
+from program_utils import *
 
 # data file
 db_file = "budget.db"
 struct_file = "structure.json"
-
-# pretty-print dates
-def print_date(freq, day):
-    if freq.lower() == "daily":
-        return "Daily"
-    elif freq.lower() == "weekly":
-        return "Every " + calendar.day_name[day]
-    elif freq.lower() == "monthly":
-        return "Every " + ordinal(day) + " of the month"
-    else:
-        d = datetime.date.fromordinal(day)
-        return "Every " + d.strftime("%B ") + ordinal(d.day)
-
-# get ordinal numbers from cardinal ones
-def ordinal(n):
-    suffix = "tsnrhtdd"[((n // 10) % 10 != 1) * (n % 10 < 4) * n % 10::4]
-    return "{:d}{:s}".format(n, suffix)
 
 # get account data from db
 def get_db_data(cursor, table="accounts"):
@@ -61,6 +42,7 @@ if __name__ == '__main__':
         # make tables if they don't already exist
         for k, v in formats.items():
             fmt_str = ", ".join([" ".join(a) for a in v])
+            print(k)
             c.execute('CREATE TABLE IF NOT EXISTS {0} ({1})'.format(k, fmt_str))
         # editing
         if args.edit:

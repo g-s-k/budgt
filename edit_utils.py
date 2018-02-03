@@ -24,27 +24,6 @@ def print_edit_oper():
     print("    (blank)  exit")
     print("")
 
-# show accounts from list of rows
-def show_accts(accts):
-    print("\nAccount\t\t Balance\t   Holds")
-    print("-------\t\t -------\t   -----")
-    for row in sorted(accts, key=lambda x: x['name']):
-        name_pad = row['name'] + ' ' * (8 - len(row['name']))
-        factor = 1 if row['positive'] else -1
-        print("{0}\t{1:8.02f}\t{2:8.02f}".format(name_pad,
-            row['balance'] * factor, -row['holds']))
-    print("")
-
-# show transactions from list of rows
-def show_trsct(trsct):
-    print("\nTransaction\t  Amount   Source      Frequency")
-    print("-----------\t  ------   ------      ---------")
-    for row in sorted(trsct, key=lambda x: x['name']):
-        print("{0:8s}\t{1:8.02f}   {2:10s}  {3}".format(row['name'],
-            row['amount'], row['account'],
-            print_date(row['frequency'], row['day'])))
-    print("")
-
 # get kb input for account
 def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balance=None):
     if name is None:
