@@ -61,6 +61,6 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balan
         positive = int(positive) if positive else 1
     if positive and min_balance is None:
         min_balance = input("Enter minimum balance: ")
-        min_balance = float(min_balance) if min_balance else 0
+    min_balance = float(min_balance) if min_balance else 0
     return dict(name=name, balance=balance, holds=holds,
                 min_balance=min_balance, positive=positive, color=None)
