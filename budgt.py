@@ -122,24 +122,8 @@ if __name__ == '__main__':
                 acct_info = get_acct_input(positive=False, min_balance=False)
                 if not acct_info['name']: break
                 if acct_info['name'] in [a['name'] for a in accts]:
-                    # start sql command
-                    cmd_str = "UPDATE accounts SET "
-                    # minimal units
-                    bal_str = "balance={:.02f}".format(float(acct_info['balance'])) if acct_info['balance'] else ""
-                    hol_str = "holds={:.02f}".format(float(acct_info['holds'])) if acct_info['holds'] else ""
-                    # change balance?
-                    if acct_info['balance']:
-                        cmd_str += bal_str
-                        if acct_info['holds']:
-                            cmd_str += ", " + hol_str
-                    elif acct_info['holds']:
-                        cmd_str += hol_str
-                    else:
-                        print("No values entered.")
-                        continue
-                    # add account name
-                    cmd_str += " WHERE name='{0}'".format(acct_info['name'])
-                    # actually execute it
+                    # turn dict into query and execute it
+                    cmd_str = build_update_query(acct_info)
                     c.execute(cmd_str)
                 else:
                     print("Account '{0}' not in database.".format(acct_info['name']))

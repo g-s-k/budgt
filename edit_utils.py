@@ -65,3 +65,21 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balan
         min_balance = float(min_balance) if min_balance else 0
     return dict(name=name, balance=balance, holds=holds,
                 min_balance=min_balance, positive=positive, color=None)
+
+def build_update_query(acct_info):
+    cmd_str = "UPDATE accounts SET "
+    # minimal units
+    bal_str = "balance={:.02f}".format(float(acct_info['balance'])) if acct_info['balance'] else ""
+    hol_str = "holds={:.02f}".format(float(acct_info['holds'])) if acct_info['holds'] else ""
+    # change balance?
+    if acct_info['balance']:
+        cmd_str += bal_str
+        if acct_info['holds']:
+            cmd_str += ", " + hol_str
+    elif acct_info['holds']:
+        cmd_str += hol_str
+    else:
+        return ""
+    # add account name
+    cmd_str += " WHERE name='{0}'".format(acct_info['name'])
+    return cmd_str
