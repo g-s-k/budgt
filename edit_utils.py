@@ -79,7 +79,7 @@ def build_update_query(acct_info):
     elif acct_info['holds']:
         cmd_str += hol_str
     else:
-        return ""
+        return
     # add account name
     cmd_str += " WHERE name='{0}'".format(acct_info['name'])
     return cmd_str

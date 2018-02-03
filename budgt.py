@@ -124,7 +124,8 @@ if __name__ == '__main__':
                 if acct_info['name'] in [a['name'] for a in accts]:
                     # turn dict into query and execute it
                     cmd_str = build_update_query(acct_info)
-                    c.execute(cmd_str)
+                    if cmd_str is not None:
+                        c.execute(cmd_str)
                 else:
                     print("Account '{0}' not in database.".format(acct_info['name']))
                 print("")
