@@ -27,10 +27,7 @@ if __name__ == '__main__':
         if args.clear:
             clear_db(c, formats.keys())
         # make tables if they don't already exist
-        for k, v in formats.items():
-            fmt_str = ", ".join([" ".join(a) for a in v])
-            print(k)
-            c.execute('CREATE TABLE IF NOT EXISTS {0} ({1})'.format(k, fmt_str))
+        init_db(c, formats)
         # editing
         if args.edit:
             print_edit_opts()

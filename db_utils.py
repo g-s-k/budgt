@@ -16,3 +16,9 @@ def add_to_table(c, tbl, data):
 def clear_db(cursor, tables):
     for tbl in tables:
         cursor.execute("DROP TABLE IF EXISTS {0}".format(tbl))
+
+# initialize tables if not present
+def init_db(cursor, structure):
+    for tbl, fields in structure.items():
+        fmt_str = ", ".join([" ".join(a) for a in fields])
+        cursor.execute('CREATE TABLE IF NOT EXISTS {0} ({1})'.format(tbl, fmt_str))
