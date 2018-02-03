@@ -25,8 +25,7 @@ if __name__ == '__main__':
         c = conn.cursor()
         # clear data if prompted
         if args.clear:
-            c.execute("DROP TABLE IF EXISTS accounts")
-            c.execute("DROP TABLE IF EXISTS transactions")
+            clear_db(c, formats.keys())
         # make tables if they don't already exist
         for k, v in formats.items():
             fmt_str = ", ".join([" ".join(a) for a in v])

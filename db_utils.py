@@ -3,6 +3,7 @@ def get_db_data(cursor, table="accounts"):
     cursor.execute("SELECT * FROM " + table)
     return cursor.fetchall()
 
+# append data to table
 def add_to_table(c, tbl, data):
     data_str = []
     for col in formats[tbl]:
@@ -10,3 +11,8 @@ def add_to_table(c, tbl, data):
         data_str.append(el_str.format(data[col[0]]))
     c.execute("INSERT INTO {0} VALUES ({1})".format(tbl, ", ".join(data_str)))
     return
+
+# clear the database without destroying unrelated data
+def clear_db(cursor, tables):
+    for tbl in tables:
+        cursor.execute("DROP TABLE IF EXISTS {0}".format(tbl))
