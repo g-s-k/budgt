@@ -119,14 +119,16 @@ if __name__ == '__main__':
             show_accts(accts)
             # update accounts until break
             while True:
-                acct = input("Enter account to update (leave blank to exit): ")
-                if not acct: break
-                if acct in [a['name'] for a in accts]:
+                acct_info = get_acct_input(positive=False, min_balance=False)
+                if not acct_info['name']: break
+                if acct_info['name'] in [a['name'] for a in accts]:
                     # start sql command
                     cmd_str = "UPDATE accounts SET "
                     # get input(s)
-                    bal = input("Enter balance: ")
-                    hol = input("Enter holds:   ")
+                    # bal = input("Enter balance: ")
+                    # hol = input("Enter holds:   ")
+                    bal = acct_info['balance']
+                    hol = acct_info['holds']
                     # minimal units
                     bal_str = "balance={:.02f}".format(float(bal)) if bal else ""
                     hol_str = "holds={:.02f}".format(float(hol)) if hol else ""
@@ -141,12 +143,12 @@ if __name__ == '__main__':
                         print("No values entered.")
                         continue
                     # add account name
-                    cmd_str += " WHERE name='{0}'".format(acct)
+                    cmd_str += " WHERE name='{0}'".format(acct_info['name'])
                     print(cmd_str)
                     # actually execute it
                     c.execute(cmd_str)
                 else:
-                    print("Account '{0}' not in database.".format(acct))
+                    print("Account '{0}' not in database.".format(acct_info['name']))
                 print("")
         # show accounts
         show_accts(get_db_data(c, "accounts"))
