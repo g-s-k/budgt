@@ -4,6 +4,7 @@
     ["balance", "numeric", "NOT NULL"],
     ["holds", "numeric", "NOT NULL"],
     ["positive", "integer", "NOT NULL"],
+    ["min_balance", "integer", "NOT NULL"],
     ["color", "text"]
   ],
   "transactions": [
