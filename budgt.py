@@ -6,23 +6,11 @@ import json
 
 from edit_utils import *
 from program_utils import *
+from db_utils import *
 
 # data file
 db_file = "budget.db"
 struct_file = "structure.json"
-
-# get account data from db
-def get_db_data(cursor, table="accounts"):
-    cursor.execute("SELECT * FROM " + table)
-    return cursor.fetchall()
-
-def add_to_table(c, tbl, data):
-    data_str = []
-    for col in formats[tbl]:
-        el_str = "'{0}'" if col[1] == "text" else "{0}"
-        data_str.append(el_str.format(data[col[0]]))
-    c.execute("INSERT INTO {0} VALUES ({1})".format(tbl, ", ".join(data_str)))
-    return
 
 if __name__ == '__main__':
     # find out what the user wants
