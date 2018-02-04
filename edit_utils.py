@@ -25,10 +25,10 @@ def print_edit_oper():
     print("")
 
 # get kb input for account
-def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balance=None):
+def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balance=None, name_only=False):
     if name is None:
         name = input("Enter account name: ")
-    if name:
+    if name and not name_only:
         if balance is None:
             balance = input("Enter account balance: ")
             balance = float(balance) if balance else 0.
@@ -44,6 +44,21 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balan
         min_balance = float(min_balance) if min_balance else 0
     return dict(name=name, balance=balance, holds=holds,
                 min_balance=min_balance, positive=positive, color=None)
+
+# get kb input for transaction
+def get_trsct_input(name=None, amount=None, source=None, dest=None,
+                    frequency=None, day=None, name_only=False):
+    name = input("Enter transaction name: ")
+    if name and not name_only:
+        amount = input("Enter transaction amount: ")
+        amount = float(amount) if amount else 0.
+        source = input("Enter source account: ")
+        dest = input("Enter destination account: ")
+        frequency = input("Enter transaction frequency: ")
+        day = input("Enter transaction day: ")
+        day = int(day) if day else 0
+    return dict(name=name, amount=amount, source=source, dest=dest,
+                frequency=frequency, day=day)
 
 def build_update_query(acct_info):
     cmd_str = "UPDATE accounts SET "

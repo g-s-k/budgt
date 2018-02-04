@@ -30,43 +30,42 @@ if __name__ == '__main__':
         init_db(c, formats)
         # editing
         if args.edit:
+            edit_cat = {"accounts": {"display": show_accts,
+                                     "get": get_acct_input},
+                        "transactions": {"display": show_trsct,
+                                         "get": get_trsct_input}}
             print_edit_opts()
             while True:
                 edit_tbl = input("Choose category to edit: ")
-                if not edit_tbl: break
+                if not edit_tbl:
+                    break
                 # go to the table that was picked
-                if is_letter_opt(edit_tbl, "a"):
-                    # show accounts
-                    accts = get_db_data(c, "accounts")
-                    show_accts(accts)
-                    # decide what to do
-                    a_r_m = input("Choose operation to perform: ")
-                    if not a_r_m:
-                        continue
-                    elif is_letter_opt(a_r_m, "a"):
-                        acct_info = get_acct_input()
-                        insert_record(c, "accounts", acct_info, formats)
-                    elif is_letter_opt(a_r_m, "r"):
-                        acct_info = get_acct_input(balance=0, holds=0, positive=0)
-                        delete_record(c, 'accounts', {"name": acct_info['name']})
-                    elif is_letter_opt(a_r_m, "m"):
-                        acct_info = get_acct_input()
-                        name_tmp = acct_info.pop('name')
-                        update_record(c, 'accounts', acct_info, {"name": name_tmp})
-                    else:
-                        print_edit_oper()
+                elif is_letter_opt(edit_tbl, "a"):
+                    edit_typ = "accounts"
                 elif is_letter_opt(edit_tbl, "t"):
-                    # show transactions
-                    trscts = get_db_data(c, "transactions")
-                    show_trsct(trscts)
-                    # decide what to do
-                    a_r_m = input("Choose operation to perform: ")
-                    if not a_r_m: continue
-                elif is_letter_opt(edit_tbl, "h"):
-                    print_edit_opts()
+                    edit_typ = "transactions"
                 else:
-                    print("Unrecognized option. Enter 'H' for help.")
+                    print_edit_opts()
                     continue
+                # show existing data available to edit
+                existing_data = get_db_data(c, edit_typ)
+                edit_cat[edit_typ]["display"](existing_data)
+                # decide what to do
+                a_r_m = input("Choose operation to perform: ")
+                if not a_r_m:
+                    continue
+                elif is_letter_opt(a_r_m, "a"):
+                    add_data = edit_cat[edit_typ]["get"]()
+                    insert_record(c, edit_typ, add_data, formats)
+                elif is_letter_opt(a_r_m, "r"):
+                    rem_data = edit_cat[edit_typ]["get"](name_only=True)
+                    delete_record(c, edit_typ, {"name": rem_data['name']})
+                elif is_letter_opt(a_r_m, "m"):
+                    mod_data = edit_cat[edit_typ]["get"]()
+                    name_tmp = mod_data.pop("name")
+                    update_record(c, edit_typ, mod_data, {"name": name_tmp})
+                else:
+                    print_edit_oper()
         elif args.update:
             # show accounts
             accts = get_db_data(c, "accounts")
@@ -74,15 +73,13 @@ if __name__ == '__main__':
             # update accounts until break
             while True:
                 acct_info = get_acct_input(positive=False, min_balance=False)
-                if not acct_info['name']: break
-                if acct_info['name'] in [a['name'] for a in accts]:
-                    # turn dict into query and execute it
-                    cmd_str = build_update_query(acct_info)
-                    if cmd_str is not None:
-                        c.execute(cmd_str)
+                if not acct_info['name']:
+                    break
                 else:
-                    print("Account '{0}' not in database.".format(acct_info['name']))
-                print("")
+                    acct_info["positive"] = None
+                    acct_info["min_balance"] = None
+                    name_tmp = acct_info.pop('name')
+                    update_record(c, 'accounts', acct_info, {"name": name_tmp})
         # show accounts
         show_accts(get_db_data(c, "accounts"))
         # show transactions
