@@ -45,13 +45,10 @@ if __name__ == '__main__':
                         continue
                     elif is_letter_opt(a_r_m, "a"):
                         acct_info = get_acct_input()
-                        add_to_table(c, "accounts", acct_info)
+                        insert_record(c, "accounts", acct_info, formats)
                     elif is_letter_opt(a_r_m, "r"):
-                        acct = input("Enter account to remove: ")
-                        if acct in [a['name'] for a in accts]:
-                            c.execute("DELETE FROM accounts WHERE name='{0}'".format(acct))
-                        else:
-                            print("{0} not found in list of accounts.".format(acct))
+                        acct_info = get_acct_input(balance=0, holds=0, positive=0)
+                        delete_record(c, 'accounts', {"name": acct_info['name']})
                     elif is_letter_opt(a_r_m, "m"):
                         pass
                     else:
