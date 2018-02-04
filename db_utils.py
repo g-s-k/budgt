@@ -25,5 +25,21 @@ def init_db(cursor, structure):
 
 # remove record from table
 def delete_record(cursor, tbl, where):
-    where_lst = ["{0}={1}".format(k, "'{0}'".format(v) if isinstance(v, str) else v) for k, v in where.items()]
-    cursor.execute("DELETE FROM {0} WHERE {1}".format(tbl, " AND ".join(where_lst)))
+    cursor.execute("DELETE FROM {0} {1}".format(tbl, dict2where(where)))
+
+# update existing record
+def update_record(cursor, tbl, new_data, where):
+    cursor.execute("UPDATE {0} SET {1} {2}".format(tbl, dict2csl(new_data), dict2where(where)))
+
+# convert dictionary to list of equals strings
+def dict2list(d):
+    return ["{0}={1}".format(k, "'{0}'".format(v) if isinstance(v, str) else v)
+            for k, v in d.items() if v is not None]
+
+# convert dictionary to comma sep list
+def dict2csl(d):
+    return ", ".join(dict2list(d))
+
+# convert dictionary to where clause
+def dict2where(d):
+    return "WHERE " + " AND ".join(dict2list(d)) if len(d) else ""

@@ -50,7 +50,9 @@ if __name__ == '__main__':
                         acct_info = get_acct_input(balance=0, holds=0, positive=0)
                         delete_record(c, 'accounts', {"name": acct_info['name']})
                     elif is_letter_opt(a_r_m, "m"):
-                        pass
+                        acct_info = get_acct_input()
+                        name_tmp = acct_info.pop('name')
+                        update_record(c, 'accounts', acct_info, {"name": name_tmp})
                     else:
                         print_edit_oper()
                 elif is_letter_opt(edit_tbl, "t"):
