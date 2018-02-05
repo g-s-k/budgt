@@ -7,6 +7,7 @@ import json
 from edit_utils import *
 from program_utils import *
 from db_utils import *
+from plot_utils import *
 
 # data file
 db_file = "budget.db"
@@ -80,6 +81,14 @@ if __name__ == '__main__':
                     acct_info["min_balance"] = None
                     name_tmp = acct_info.pop('name')
                     update_record(c, 'accounts', acct_info, {"name": name_tmp})
+        else:
+            # TODO: make this an argument somehow
+            num_days = 365
+            # fetch initial data from db
+            acct_data = get_db_data(c, "accounts")
+            trsct_data = get_db_data(c, "transactions")
+            # give it to function in separate module
+            project_balances(num_days, acct_data, trsct_data)
         # show accounts
         show_accts(get_db_data(c, "accounts"))
         # show transactions
