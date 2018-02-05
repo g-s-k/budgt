@@ -20,7 +20,7 @@ def project_balances(n_days, accounts, transactions):
         account = dict(account)
         account["init_balance"] = (-1)**(account["positive"] + 1) * \
             account["balance"] - account["holds"]
-        account["value"] = np.zeros(days.shape)
+        account["value"] = np.zeros(days.shape) + account["init_balance"]
         for trans in trans_lst:
             if trans["source"] == account["name"]:
                 account["value"] -= trans["value"]
