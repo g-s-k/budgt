@@ -45,10 +45,12 @@ def show_accts(accts):
 
 # show transactions from list of rows
 def show_trsct(trsct):
-    print("\nTransaction\t  Amount   Source      Frequency")
-    print("-----------\t  ------   ------      ---------")
+    fmt_str = "{0:15s}  {1:>9s}  {2:15s}  {3:15s}  {4:s}"
+    fmt_num = "{0:15s}  {1:9.02f}  {2:15s}  {3:15s}  {4:s}"
+    print("")
+    print(fmt_str.format("Transaction", "Amount", "Source", "Destination", "Frequency"))
+    print(fmt_str.format("-----------", "------", "------", "-----------", "---------"))
     for row in sorted(trsct, key=lambda x: x['name']):
-        print("{0:8s}\t{1:8.02f}   {2:10s}  {3}".format(row['name'],
-            row['amount'], row['source'],
-            print_date(row['frequency'], row['day'])))
+        print(fmt_num.format(row['name'], row['amount'], row['source'],
+            row['dest'], print_date(row['frequency'], row['day'])))
     print("")
