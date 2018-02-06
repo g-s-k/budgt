@@ -8,6 +8,7 @@ def is_today(day, trans):
     cases.append(trans["frequency"] == "daily")
     cases.append(trans["frequency"] == "weekly" and trans["day"] == day.weekday())
     cases.append(trans["frequency"] == "monthly" and trans["day"] == day.day)
+    cases.append(trans["frequency"] == "monthly" and trans["day"] == (day.day - calendar.monthrange(day.year, day.month)[1] - 1))
     cases.append(trans["frequency"] == "annual" and trans["day"] == day.timetuple().tm_yday)
     return any(case for case in cases)
 

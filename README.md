@@ -5,6 +5,7 @@ Budget forecasting with Python
   * Make its own database file
   * Add and remove accounts and transactions
   * Help you see what's in your database and update the values
+  * Supports negative date indexing (days from end of the month)
   * Use that data to project your future account balances
   * Plot your balances into the future
   * Tell you when to pay off your credit card
@@ -15,7 +16,6 @@ Budget forecasting with Python
   * Provide color and order configuration that is stored in the database
   * Get current balances from the web (via OFX)
   * Support payment due dates
-  * Support negative date indices
   * Support batch import/export from json
 
 ## How it works

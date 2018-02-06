@@ -29,8 +29,14 @@ def print_date(freq, day):
 
 # get ordinal numbers from cardinal ones
 def ordinal(n):
-    suffix = "tsnrhtdd"[((n // 10) % 10 != 1) * (n % 10 < 4) * n % 10::4]
-    return "{:d}{:s}".format(n, suffix)
+    if n < 0:
+        if n == -1:
+            return "last"
+        else:
+            return ordinal(-n) + " to last"
+    else:
+        suffix = "tsnrhtdd"[((n // 10) % 10 != 1) * (n % 10 < 4) * n % 10::4]
+        return "{:d}{:s}".format(n, suffix)
 
 # show accounts from list of rows
 def show_accts(accts):
