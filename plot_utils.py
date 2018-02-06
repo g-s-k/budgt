@@ -49,6 +49,6 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                     pass
     # plot it
     for n, a in accts.items():
-        plt.fill_between(date_vec, a["value"], label=n)
+        plt.fill_between(date_vec, a["value"], label=n, alpha=0.8)
     plt.legend()
     plt.show()
