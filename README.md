@@ -5,11 +5,13 @@ Budget forecasting with Python
   * Make its own database file
   * Add and remove accounts and transactions
   * Help you see what's in your database and update the values
+  * Use that data to project your future account balances
+  * Plot your balances into the future
+  * Tell you when to pay off your credit card
 
 ## What it should do
-  * Plot your balances and net worth into the future
-  * Use that data to project your future account balances
-  * Tell you when to pay off your credit card
+  * Calculate and plot net worth
+  * Stack different accounts' balances on top of each other
   * Provide color and order configuration that is stored in the database
   * Get current balances from the web (via OFX)
   * Support payment due dates
