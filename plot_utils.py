@@ -49,7 +49,18 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                         print("Transaction '{0}' failed on day {1} of {2} because {3}".format(trans["name"], day, n_days, str(ve)))
                     pass
     # plot it
-    for n, a in accts.items():
-        plt.fill_between(date_vec, a["value"], label=n, alpha=0.8)
+    pos_accts = {k: v for k, v in accts.items() if v["positive"]}
+    plot_stacked(date_vec, pos_accts)
+    neg_accts = {k: v for k, v in accts.items() if not v["positive"]}
+    plot_stacked(date_vec, neg_accts)
     plt.legend()
     plt.show()
+    return
+
+
+def plot_stacked(date_vec, accts):
+    old_vals = np.zeros(date_vec.shape)
+    for n, a in accts.items():
+        plt.fill_between(date_vec, a["value"] + old_vals, old_vals, label=n, alpha=0.8)
+        old_vals = a["value"]
+    return
