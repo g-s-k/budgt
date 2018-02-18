@@ -53,9 +53,11 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                     pass
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
-    plot_stacked(date_vec, pos_accts)
+    gross_pos = plot_stacked(date_vec, pos_accts)
     neg_accts = {k: v for k, v in accts.items() if not v["positive"]}
-    plot_stacked(date_vec, neg_accts)
+    gross_neg = plot_stacked(date_vec, neg_accts)
+    # plot net worth and show it
+    plt.plot(date_vec, gross_pos + gross_neg, linestyle="-.", color="black", label="Net worth")
     plt.legend()
     plt.show()
     return
