@@ -13,7 +13,9 @@ edit_g.add_argument("-e", "--edit", action="store_true",
                     help="edit, add, or remove entries")
 edit_g.add_argument("-u", "--update", action="store_true",
                     help="update account balances")
-parser.add_argument("-v", "--verbose", action="count")
+parser.add_argument("-v", "--verbose", action="count", help="verbosity level")
+parser.add_argument("-n", "--num", type=int, default=365,
+                    help="number of days to forecast, default 365")
 parser.add_argument("-f", "--file", help="input data from file")
 
 # pretty-print dates
