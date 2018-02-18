@@ -16,6 +16,8 @@ struct_file = "structure.json"
 if __name__ == '__main__':
     # find out what the user wants
     args = parser.parse_args()
+    # fix some things up
+    verbosity = 0 if args.verbose is None else args.verbose
     # get definition of data structures
     with open(struct_file, "r") as f:
         formats = json.load(f)
@@ -88,7 +90,7 @@ if __name__ == '__main__':
             acct_data = get_db_data(c, "accounts")
             trsct_data = get_db_data(c, "transactions")
             # give it to function in separate module
-            project_balances(num_days, acct_data, trsct_data)
+            project_balances(num_days, acct_data, trsct_data, verbosity=verbosity)
         # show accounts
         show_accts(get_db_data(c, "accounts"))
         # show transactions

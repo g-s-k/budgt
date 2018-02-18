@@ -17,6 +17,17 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
     accts = {a["name"]: dict(a) for a in accounts}
     for a in accts.keys():
         accts[a]["value"] = np.zeros(n_days) + (-1)**(accts[a]["positive"] + 1) * accts[a]["balance"] - accts[a]["holds"]
+    if verbosity:
+        print("")
+        fmt_str = "{0:15s} {1:15s} {2:>9s}   {3:15s}"
+        if verbosity > 1:
+            fmt_str += " {4:>9s} {5:15s} {6:>9s}"
+            if verbosity > 2:
+                fmt_str += " {7:s}"
+        else:
+            fmt_str +=  " {5:15s}"
+        print(fmt_str.format("Date", "Name", "Amount", "Source", "Balance", "Destination", "Balance", "Success"))
+        print(fmt_str.format("----", "----", "------", "------", "-------", "-----------", "-------", "-------"))
     # iterate through days
     date_vec = np.arange(n_days) * dt.timedelta(days=1) + dt.date.today()
     for day in range(n_days):
@@ -35,18 +46,10 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                         in_acct.append("d")
                         accts[trans["dest"]]["value"][day:] += trans["amount"]
                     if verbosity:
-                        fmt_str = "Transaction '{0}' "
-                        if "s" in in_acct and "d" in in_acct:
-                            fmt_str += "transferred ${1:.02f} from account '{2}' to account '{3}'"
-                        elif "s" in in_acct:
-                            fmt_str += "decreased account '{2}' balance by ${1:.02f}"
-                        elif "d" in in_acct:
-                            fmt_str += "increased account '{3}' balance by ${1:.02f}"
-                        fmt_str += " on day {4} of {5}"
-                        print(fmt_str.format(trans["name"], trans["amount"], trans["source"], trans["dest"], day, n_days))
+                        print_hist(date_vec[day], trans, {"source": 0, "dest": 0}, verbosity=verbosity)
                 except ValueError as ve:
-                    if verbosity > 1:
-                        print("Transaction '{0}' failed on day {1} of {2} because {3}".format(trans["name"], day, n_days, str(ve)))
+                    if verbosity > 2:
+                        print_hist(date_vec[day], trans, {"source": 0, "dest": 0}, success=False, verbosity=verbosity)
                     pass
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
@@ -61,6 +64,21 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
 def plot_stacked(date_vec, accts):
     old_vals = np.zeros(date_vec.shape)
     for n, a in accts.items():
-        plt.fill_between(date_vec, a["value"] + old_vals, old_vals, label=n, alpha=0.8)
+        plt.fill_between(date_vec, a["value"] + old_vals, old_vals, label=n, alpha=0.75)
         old_vals = a["value"]
     return
+
+
+def print_hist(day, trsct, bals, success=True, verbosity=1):
+    # build format string
+    fmt_str = "{0:15s} {1:15s} {2:9.02f}   {3:15s}"
+    if verbosity > 1:
+        fmt_str += " {4:9.02f} {5:15s} {6:9.02f}"
+        if verbosity > 2:
+            fmt_str += " {7:s}"
+    else:
+        fmt_str += " {5:15s}"
+    # fill it in and print it out
+    print(fmt_str.format(day.strftime("%a, %b %d"), trsct["name"],
+                         trsct["amount"], trsct["source"], bals["source"],
+                         trsct["dest"], bals["dest"], repr(success)))
