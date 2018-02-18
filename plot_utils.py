@@ -65,8 +65,8 @@ def plot_stacked(date_vec, accts):
     old_vals = np.zeros(date_vec.shape)
     for n, a in accts.items():
         plt.fill_between(date_vec, a["value"] + old_vals, old_vals, label=n, alpha=0.75)
-        old_vals = a["value"]
-    return
+        old_vals += a["value"]
+    return old_vals
 
 
 def safe_get_balances(accts, trans, day):
