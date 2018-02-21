@@ -34,22 +34,36 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
         for trans in transactions:
             if is_today(date_vec[day], trans):
                 try:
-                    if trans["source"] in accts and accts[trans["source"]]["positive"] and accts[trans["source"]]["value"][day] - trans["amount"] < accts[trans["source"]]["min_balance"]:
-                            raise ValueError("insufficient funds in account {0}".format(trans["source"]))
-                    if trans["dest"] in accts and not accts[trans["dest"]]["positive"] and accts[trans["dest"]]["value"][day] + trans["amount"] > 0:
-                            raise ValueError("credit account {0} cannot have positive balance".format(trans["dest"]))
+                    # check pre-transaction balances
+                    pre_trsct = safe_get_balances(accts, trans, day)
+                    # ensure they are sufficient
+                    if pre_trsct["source"] is not None and \
+                            accts[trans["source"]]["positive"] and \
+                            pre_trsct["source"] - trans["amount"] < accts[trans["source"]]["min_balance"]:
+                        raise ValueError("insufficient funds in account {0}".format(trans["source"]))
+                    if pre_trsct["dest"] is not None and \
+                            not accts[trans["dest"]]["positive"] and \
+                            pre_trsct["dest"] + trans["amount"] > 0:
+                        if pre_trsct["dest"] < -accts[trans["dest"]]["min_balance"]:
+                            trans_amt = -pre_trsct["dest"]
+                        else:
+                            raise ValueError("credit account {0} balance "
+                                             "should not exceed threshhold "
+                                             "unless being paid off".format(trans["dest"]))
+                    else:
+                        trans_amt = trans["amount"]
                     in_acct = []
                     if trans["source"] in accts:
                         in_acct.append("s")
-                        accts[trans["source"]]["value"][day:] -= trans["amount"]
+                        accts[trans["source"]]["value"][day:] -= trans_amt
                     if trans["dest"] in accts:
                         in_acct.append("d")
-                        accts[trans["dest"]]["value"][day:] += trans["amount"]
+                        accts[trans["dest"]]["value"][day:] += trans_amt
                     if verbosity:
-                        print_hist(date_vec[day], trans, safe_get_balances(accts, trans, day), verbosity=verbosity)
+                        print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), verbosity=verbosity)
                 except ValueError as ve:
                     if verbosity > 2:
-                        print_hist(date_vec[day], trans, safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
+                        print_hist(date_vec[day], trans, trans["amount"], safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
                     pass
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
@@ -80,7 +94,7 @@ def strf_bal(bal):
     return "" if bal is None else "{0:.02f}".format(bal)
 
 
-def print_hist(day, trsct, bals, success=True, verbosity=1):
+def print_hist(day, trsct_meta, trsct_amt, bals, success=True, verbosity=1):
     # build format string
     fmt_str = "{0:15s} {1:15s} {2:9.02f}   {3:15s}"
     if verbosity > 1:
@@ -90,9 +104,9 @@ def print_hist(day, trsct, bals, success=True, verbosity=1):
     else:
         fmt_str += " {5:15s}"
     # fill it in and print it out
-    print(fmt_str.format(day.strftime("%a, %b %d"), trsct["name"],
-                         trsct["amount"], trsct["source"],
-                         strf_bal(bals["source"]), trsct["dest"],
+    print(fmt_str.format(day.strftime("%a, %b %d"), trsct_meta["name"],
+                         trsct_amt, trsct_meta["source"],
+                         strf_bal(bals["source"]), trsct_meta["dest"],
                          strf_bal(bals["dest"]), repr(success)))
     return
 

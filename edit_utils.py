@@ -39,7 +39,7 @@ def get_acct_input(name=None, balance=None, holds=None, positive=None, min_balan
             positive = input("Enter 1 if this account holds positive value, or 0 "
                              "for negative value: ")
             positive = int(positive) if positive else 1
-        if positive and min_balance is None:
+        if min_balance is None:
             min_balance = input("Enter minimum balance: ")
         min_balance = float(min_balance) if min_balance else 0
     return dict(name=name, balance=balance, holds=holds,
