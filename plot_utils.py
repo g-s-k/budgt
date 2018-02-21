@@ -73,19 +73,26 @@ def plot_stacked(date_vec, accts):
 
 def safe_get_balances(accts, trans, day):
     names = ("source", "dest")
-    return {name: accts.get(trans[name], {}).get("value", [0] * (day + 1))[day] for name in names}
+    return {name: accts.get(trans[name], {}).get("value", [None] * (day + 1))[day] for name in names}
+
+
+def strf_bal(bal):
+    return "" if bal is None else "{0:.02f}".format(bal)
 
 
 def print_hist(day, trsct, bals, success=True, verbosity=1):
     # build format string
     fmt_str = "{0:15s} {1:15s} {2:9.02f}   {3:15s}"
     if verbosity > 1:
-        fmt_str += " {4:9.02f} {5:15s} {6:9.02f}"
+        fmt_str += " {4:9s} {5:15s} {6:9s}"
         if verbosity > 2:
             fmt_str += " {7:s}"
     else:
         fmt_str += " {5:15s}"
-    # fill it in and print it out TODO: make zero balances disappear
+    # fill it in and print it out
     print(fmt_str.format(day.strftime("%a, %b %d"), trsct["name"],
-                         trsct["amount"], trsct["source"], bals["source"],
-                         trsct["dest"], bals["dest"], repr(success)))
+                         trsct["amount"], trsct["source"],
+                         strf_bal(bals["source"]), trsct["dest"],
+                         strf_bal(bals["dest"]), repr(success)))
+    return
+
