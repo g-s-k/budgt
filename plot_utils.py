@@ -40,7 +40,8 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                     if pre_trsct["source"] is not None and \
                             accts[trans["source"]]["positive"] and \
                             pre_trsct["source"] - trans["amount"] < accts[trans["source"]]["min_balance"]:
-                        raise ValueError("insufficient funds in account {0}".format(trans["source"]))
+                                raise ValueError("insufficient funds in account {0}".format(trans["source"])
+                                # TODO: make sure critical transactions (e.g. rent) actually get paid and don't just get ignored
                     if pre_trsct["dest"] is not None and \
                             not accts[trans["dest"]]["positive"] and \
                             pre_trsct["dest"] + trans["amount"] > 0:
@@ -98,7 +99,7 @@ def print_hist(day, trsct_meta, trsct_amt, bals, success=True, verbosity=1):
     # build format string
     fmt_str = "{0:15s} {1:15s} {2:9.02f}   {3:15s}"
     if verbosity > 1:
-        fmt_str += " {4:9s} {5:15s} {6:9s}"
+        fmt_str += " {4:>9s} {5:15s} {6:>9s}"
         if verbosity > 2:
             fmt_str += " {7:s}"
     else:
