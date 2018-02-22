@@ -40,7 +40,7 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                     if pre_trsct["source"] is not None and \
                             accts[trans["source"]]["positive"] and \
                             pre_trsct["source"] - trans["amount"] < accts[trans["source"]]["min_balance"]:
-                                raise ValueError("insufficient funds in account {0}".format(trans["source"])
+                                raise ValueError("insufficient funds in account {0}".format(trans["source"]))
                                 # TODO: make sure critical transactions (e.g. rent) actually get paid and don't just get ignored
                     if pre_trsct["dest"] is not None and \
                             not accts[trans["dest"]]["positive"] and \
