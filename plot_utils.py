@@ -44,8 +44,9 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
     for day in range(n_days):
         for trans in filter(trnsfr_only, transactions):
             if is_today(date_vec[day], trans):
-                # default amount
+                # defaults
                 trans_amt = trans["amount"]
+                success = True
                 try:
                     # check pre-transaction balances
                     pre_trsct = safe_get_balances(accts, trans, day)
@@ -69,14 +70,19 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                     # actually move the money
                     accts[trans["source"]]["value"][day:] -= trans_amt
                     accts[trans["dest"]]["value"][day:] += trans_amt
-                    # say what you did
-                    if verbosity:
-                        print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), verbosity=verbosity)
                 # if the user wants to see what was attempted, show them
-                except ValueError as ve:
-                    if verbosity > 2:
-                        print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
-                    # pass
+                except ValueError:
+                    success = False
+                # log the transactions in their table
+                finally:
+                    print_hist(date_vec[day], trans, trans_amt,
+                               safe_get_balances(accts, trans, day),
+                               success=success, verbosity=verbosity)
+    plot_accts(date_vec, accts)
+    return
+
+
+def plot_accts(date_vec, accts):
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
     gross_pos = plot_stacked(date_vec, pos_accts)
@@ -107,6 +113,9 @@ def strf_bal(bal):
 
 
 def print_hist(day, trsct_meta, trsct_amt, bals, success=True, verbosity=1):
+    # catch non-logging cases and failed attempts
+    if not verbosity or verbosity < 3 and not success:
+        return
     # build format string
     fmt_str = "{0:15s} {1:15s} {2:9.02f}   {3:15s}"
     if verbosity > 1:
