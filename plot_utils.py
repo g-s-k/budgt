@@ -28,20 +28,29 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
             fmt_str +=  " {5:15s}"
         print(fmt_str.format("Date", "Name", "Amount", "Source", "Balance", "Destination", "Balance", "Success"))
         print(fmt_str.format("----", "----", "------", "------", "-------", "-----------", "-------", "-------"))
-    # iterate through days
+    # accumulate transactions
     date_vec = np.arange(n_days) * dt.timedelta(days=1) + dt.date.today()
+    vect_is_today = np.vectorize(is_today)
+    # handle income first - this is nonflexible
+    income_only = lambda x: x["dest"] and not x["source"]
+    for trans in filter(income_only, transactions):
+        accts[trans["dest"]]["value"] += np.cumsum(trans["amount"] * vect_is_today(date_vec, dict(trans)))
+    # spending is (for planning purposes) regular and nonflexible
+    spend_only = lambda x: x["source"] and not x["dest"]
+    for trans in filter(spend_only, transactions):
+        accts[trans["source"]]["value"] -= np.cumsum(trans["amount"] * vect_is_today(date_vec, dict(trans)))
+    # transfers are much more complex
+    trnsfr_only = lambda x: x["source"] and x["dest"]
     for day in range(n_days):
-        for trans in transactions:
+        for trans in filter(trnsfr_only, transactions):
             if is_today(date_vec[day], trans):
                 try:
                     # check pre-transaction balances
                     pre_trsct = safe_get_balances(accts, trans, day)
                     # ensure they are sufficient
-                    if pre_trsct["source"] is not None and \
-                            accts[trans["source"]]["positive"] and \
-                            pre_trsct["source"] - trans["amount"] < accts[trans["source"]]["min_balance"]:
+                    if accts[trans["source"]]["positive"] and \
+                            np.any(accts[trans["source"]]["value"][day:] - trans["amount"] < accts[trans["source"]]["min_balance"]):
                                 raise ValueError("insufficient funds in account {0}".format(trans["source"]))
-                                # TODO: make sure critical transactions (e.g. rent) actually get paid and don't just get ignored
                     if pre_trsct["dest"] is not None and \
                             not accts[trans["dest"]]["positive"] and \
                             pre_trsct["dest"] + trans["amount"] > 0:
@@ -65,7 +74,7 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                 except ValueError as ve:
                     if verbosity > 2:
                         print_hist(date_vec[day], trans, trans["amount"], safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
-                    pass
+                    # pass
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
     gross_pos = plot_stacked(date_vec, pos_accts)
