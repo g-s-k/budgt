@@ -47,28 +47,26 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                 try:
                     # check pre-transaction balances
                     pre_trsct = safe_get_balances(accts, trans, day)
+                    if trans["amount"] > 0:
+                        trans_amt = trans["amount"]
+                    else:
+                        trans_amt = np.min(np.abs(np.concatenate([[pre_trsct["dest"]], accts[trans["source"]]["value"][day:] - accts[trans["source"]]["min_balance"] if accts[trans["source"]]["positive"] else 0])))
                     # ensure they are sufficient
                     if accts[trans["source"]]["positive"] and \
-                            np.any(accts[trans["source"]]["value"][day:] - trans["amount"] < accts[trans["source"]]["min_balance"]):
+                            np.any(accts[trans["source"]]["value"][day:] - trans_amt < accts[trans["source"]]["min_balance"]):
                                 raise ValueError("insufficient funds in account {0}".format(trans["source"]))
-                    if pre_trsct["dest"] is not None and \
-                            not accts[trans["dest"]]["positive"] and \
-                            pre_trsct["dest"] + trans["amount"] > 0:
+                    if not accts[trans["dest"]]["positive"] and \
+                            pre_trsct["dest"] + trans_amt > 0:
                         if pre_trsct["dest"] < -accts[trans["dest"]]["min_balance"]:
                             trans_amt = -pre_trsct["dest"]
                         else:
                             raise ValueError("credit account {0} balance "
                                              "should not exceed threshhold "
                                              "unless being paid off".format(trans["dest"]))
-                    else:
-                        trans_amt = trans["amount"]
-                    in_acct = []
-                    if trans["source"] in accts:
-                        in_acct.append("s")
-                        accts[trans["source"]]["value"][day:] -= trans_amt
-                    if trans["dest"] in accts:
-                        in_acct.append("d")
-                        accts[trans["dest"]]["value"][day:] += trans_amt
+                    # else:
+                        # trans_amt = trans["amount"]
+                    accts[trans["source"]]["value"][day:] -= trans_amt
+                    accts[trans["dest"]]["value"][day:] += trans_amt
                     if verbosity:
                         print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), verbosity=verbosity)
                 except ValueError as ve:
