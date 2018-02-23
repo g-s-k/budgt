@@ -44,17 +44,20 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
     for day in range(n_days):
         for trans in filter(trnsfr_only, transactions):
             if is_today(date_vec[day], trans):
+                # default amount
+                trans_amt = trans["amount"]
                 try:
                     # check pre-transaction balances
                     pre_trsct = safe_get_balances(accts, trans, day)
-                    if trans["amount"] > 0:
-                        trans_amt = trans["amount"]
-                    else:
+                    # calculate optimal amount to move (if required)
+                    if not trans_amt:
                         trans_amt = np.min(np.abs(np.concatenate([[pre_trsct["dest"]], accts[trans["source"]]["value"][day:] - accts[trans["source"]]["min_balance"] if accts[trans["source"]]["positive"] else 0])))
-                    # ensure they are sufficient
+                    # avoid overdrafts, even into the future
                     if accts[trans["source"]]["positive"] and \
-                            np.any(accts[trans["source"]]["value"][day:] - trans_amt < accts[trans["source"]]["min_balance"]):
-                                raise ValueError("insufficient funds in account {0}".format(trans["source"]))
+                        np.any(accts[trans["source"]]["value"][day:] - trans_amt < accts[trans["source"]]["min_balance"]):
+                            raise ValueError("insufficient funds in account {0}".format(trans["source"]))
+                    # avoid positive balances in negative accounts
+                    # TODO: simplify this with some vectorized numpy magic
                     if not accts[trans["dest"]]["positive"] and \
                             pre_trsct["dest"] + trans_amt > 0:
                         if pre_trsct["dest"] < -accts[trans["dest"]]["min_balance"]:
@@ -63,15 +66,16 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                             raise ValueError("credit account {0} balance "
                                              "should not exceed threshhold "
                                              "unless being paid off".format(trans["dest"]))
-                    # else:
-                        # trans_amt = trans["amount"]
+                    # actually move the money
                     accts[trans["source"]]["value"][day:] -= trans_amt
                     accts[trans["dest"]]["value"][day:] += trans_amt
+                    # say what you did
                     if verbosity:
                         print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), verbosity=verbosity)
+                # if the user wants to see what was attempted, show them
                 except ValueError as ve:
                     if verbosity > 2:
-                        print_hist(date_vec[day], trans, trans["amount"], safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
+                        print_hist(date_vec[day], trans, trans_amt, safe_get_balances(accts, trans, day), success=False, verbosity=verbosity)
                     # pass
     # plot it
     pos_accts = {k: v for k, v in accts.items() if v["positive"]}
