@@ -60,6 +60,9 @@ def project_balances(n_days, accounts, transactions, verbosity=0):
                         raise ValueError("credit account {0} balance "
                                          "should not exceed threshhold "
                                          "unless being paid off".format(trans["dest"]))
+                # catch empty transactions
+                if not trans_amt:
+                    raise ValueError("zero-valued transaction")
                 # actually move the money
                 accts[trans["source"]]["value"][day:] -= trans_amt
                 accts[trans["dest"]]["value"][day:] += trans_amt
